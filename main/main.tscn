@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://cnf8ggj1r8j7s"]
+
+[ext_resource type="Script" uid="uid://gqvjxuo32f4b" path="res://main/main.gd" id="1_53q0u"]
+[ext_resource type="Script" uid="uid://ckkhwc0cjwhdy" path="res://map/puzzle_visualizer.gd" id="2_pjrb6"]
+[ext_resource type="PackedScene" uid="uid://dd4tn7wcmhide" path="res://map/chunks/chunk.tscn" id="3_3wy1v"]
+[ext_resource type="PackedScene" uid="uid://dq305egab3g5d" path="res://map/potions/potion.tscn" id="3_c651c"]
+
+[node name="Main" type="Node2D" unique_id=833826901 node_paths=PackedStringArray("vis")]
+script = ExtResource("1_53q0u")
+vis = NodePath("PuzzleVisualizer")
+
+[node name="PuzzleVisualizer" type="Node2D" parent="." unique_id=671800585]
+position = Vector2(511, 323)
+script = ExtResource("2_pjrb6")
+potion_scene = ExtResource("3_c651c")
+chunk_scene = ExtResource("3_3wy1v")
