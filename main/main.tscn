@@ -1,16 +1,40 @@
 [gd_scene format=3 uid="uid://cnf8ggj1r8j7s"]
 
 [ext_resource type="Script" uid="uid://gqvjxuo32f4b" path="res://main/main.gd" id="1_53q0u"]
+[ext_resource type="Script" uid="uid://haho73xq30yv" path="res://puzzle-framework/tools/camera.gd" id="2_4dugh"]
 [ext_resource type="Script" uid="uid://ckkhwc0cjwhdy" path="res://map/puzzle_visualizer.gd" id="2_pjrb6"]
 [ext_resource type="PackedScene" uid="uid://dd4tn7wcmhide" path="res://map/chunks/chunk.tscn" id="3_3wy1v"]
 [ext_resource type="PackedScene" uid="uid://dq305egab3g5d" path="res://map/potions/potion.tscn" id="3_c651c"]
+[ext_resource type="Script" uid="uid://dunkj8jdwq8ju" path="res://map/potions-small/color_list.gd" id="5_3wy1v"]
+[ext_resource type="PackedScene" uid="uid://b4s586o3h3abd" path="res://map/potions-small/potion_small.tscn" id="6_kfbq2"]
+[ext_resource type="PackedScene" uid="uid://q1jom8bphw8d" path="res://puzzle-framework/gameover/game_over_dialog.tscn" id="8_67ri8"]
+[ext_resource type="PackedScene" uid="uid://2xygcypttdo7" path="res://puzzle-framework/game/game_menu.tscn" id="9_grrlh"]
 
 [node name="Main" type="Node2D" unique_id=833826901 node_paths=PackedStringArray("vis")]
 script = ExtResource("1_53q0u")
 vis = NodePath("PuzzleVisualizer")
 
-[node name="PuzzleVisualizer" type="Node2D" parent="." unique_id=671800585]
-position = Vector2(511, 323)
+[node name="PuzzleCamera" type="Camera2D" parent="." unique_id=100939459]
+script = ExtResource("2_4dugh")
+edge_margin = Vector2(96, 96)
+metadata/_custom_type_script = "uid://haho73xq30yv"
+
+[node name="PuzzleVisualizer" type="Node2D" parent="." unique_id=671800585 node_paths=PackedStringArray("color_list", "camera", "audio_error")]
 script = ExtResource("2_pjrb6")
 potion_scene = ExtResource("3_c651c")
 chunk_scene = ExtResource("3_3wy1v")
+color_list = NodePath("../ColorList/ColorList")
+camera = NodePath("../PuzzleCamera")
+audio_error = NodePath("")
+
+[node name="ColorList" type="CanvasLayer" parent="." unique_id=1609420534]
+
+[node name="ColorList" type="Node2D" parent="ColorList" unique_id=1851288887]
+position = Vector2(0, 53)
+script = ExtResource("5_3wy1v")
+potion_small_scene = ExtResource("6_kfbq2")
+
+[node name="GameOverDialog" parent="." unique_id=1270097331 instance=ExtResource("8_67ri8")]
+
+[node name="GameMenu" parent="." unique_id=950523672 instance=ExtResource("9_grrlh")]
+allow_undo = true

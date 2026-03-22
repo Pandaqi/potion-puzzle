@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://qthtu18xkcx5"]
+
+[ext_resource type="Script" uid="uid://cdgu4h7b82153" path="res://map/potions/segments/potion_segment.gd" id="1_5uegl"]
+[ext_resource type="Texture2D" uid="uid://bfj751txlyt22" path="res://map/potions/potion-spritesheet-base.png" id="2_pbfgw"]
+[ext_resource type="Texture2D" uid="uid://bw2bs2vtsfvak" path="res://map/potions/potion-spritesheet-center.png" id="3_x2y5n"]
+[ext_resource type="Texture2D" uid="uid://cxdqek8ym6yd7" path="res://map/potions/potion-spritesheet-overlay.png" id="4_tn2yy"]
+
+[node name="PotionSegment" type="Node2D" unique_id=488528841 node_paths=PackedStringArray("base", "center", "overlay")]
+script = ExtResource("1_5uegl")
+base = NodePath("Base")
+center = NodePath("Center")
+overlay = NodePath("Overlay")
+
+[node name="Base" type="Sprite2D" parent="." unique_id=426233964]
+texture = ExtResource("2_pbfgw")
+vframes = 3
+
+[node name="Center" type="Sprite2D" parent="." unique_id=562996734]
+z_index = 10
+texture = ExtResource("3_x2y5n")
+vframes = 3
+
+[node name="Overlay" type="Sprite2D" parent="." unique_id=2104550095]
+modulate = Color(1, 1, 1, 0.65882355)
+z_index = 30
+texture = ExtResource("4_tn2yy")
+vframes = 3

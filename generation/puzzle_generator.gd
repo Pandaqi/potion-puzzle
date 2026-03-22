@@ -22,6 +22,7 @@ var solution : Array[Dictionary]
 var history : Array[Array]
 
 func generate() -> void:
+	PuzzleFramework.apply_difficulty_settings(self)
 	create_random_setup()
 	take_turns()
 
@@ -63,6 +64,7 @@ func take_turns() -> void:
 	history = []
 	save_state_to_history()
 	
+	var commands := PuzzleCommands.new()
 	var num_steps := randi_range(num_moves_bounds.x, num_moves_bounds.y)
 	for i in range(num_steps):
 		var start_potion := get_random_potion_not_full()
@@ -71,9 +73,9 @@ func take_turns() -> void:
 		var target_potion := get_random_potion_with_content([start_potion])
 		if not target_potion: break
 		
-		var chunk_to_move := target_potion.get_last_chunk()
-		target_potion.remove_chunk(chunk_to_move)
-		start_potion.add_chunk(chunk_to_move)
+		commands.start_new_turn()
+		var cmd := CommandTurn.new(target_potion, start_potion)
+		commands.execute_command(cmd)
 	
 		solution.append({ "from": potions.find(start_potion), "to": potions.find(target_potion) })
 		save_state_to_history()

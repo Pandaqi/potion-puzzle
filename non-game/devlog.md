@@ -181,3 +181,42 @@ Until the next devlog,
 
 Pandaqi
 
+
+
+
+
+## @TODO
+
+Architecture / Logic / Generation
+
+* Potions should react to PotionData changes
+* Just have a permanent Chunk inside PotionSegment -> show/hide (and recolor) as needed
+* Simulation Checks (enough variation at start, no save state revisiting)
+
+Graphics
+
+* Fix tiny Potion issues: center should not extend into top, edges don't perfectly align, etc
+* Add Balatro-like painerly swirl as background? => Yes, and then use the current target color as the colors to swirl!
+* Add the "shine" shader to both PotionSmall and Target potion again?
+* Tween the ball actually moving from one potion to another
+* Tween changes in PotionSmall active
+* Some smaller tweens for nicety (such as small ball rotations, small reaction to hover over potion, etc)
+* Sound Effects: Tap Potion, Ball Move?
+
+Finishing Touches
+
+* Five difficulty levels
+* @IDEA: Can we involve actual _color mixing_ somehow as the final difficulty?
+
+
+
+@SOURCE: Great website to compress WebM I record for these video games => https://www.xconvert.com/compress-webm
+
+
+
+PuzzleFramework:
+
+* Write some short docs on the few steps to take to _integrate the framework_ in each new game.
+* Actually _save_ user settings between sessions? (And save other data, like completed puzzles/highscore/etc?)
+* Even more generic tutorial support?
+* Localization (both text and audio)

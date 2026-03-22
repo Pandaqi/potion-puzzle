@@ -3,11 +3,15 @@ class_name PuzzleVisualizer
 
 @export var potion_scene : PackedScene
 @export var chunk_scene : PackedScene
+@export var color_list : ColorList
+@export var camera : PuzzleCamera
 
-var potion_width := 64.0
+@export var audio_error : AudioStreamPlayer2D
+
+var potion_width := 256.0
 var potions : Array[Potion] = []
-var target_list : Array[Chunk]  = []
 var generator : PuzzleGenerator
+var commands : PuzzleCommands
 
 var history_index := -1
 var current_turn := -1
@@ -25,6 +29,9 @@ func goto_puzzle_state(ds:int) -> void:
 func visualize(gen:PuzzleGenerator) -> void:
 	generator = gen
 	
+	commands = PuzzleCommands.new()
+	add_child(commands)
+	
 	destroy()
 	
 	var state_to_visualize := gen.history[mini(history_index, gen.history.size()-1)]
@@ -33,11 +40,8 @@ func visualize(gen:PuzzleGenerator) -> void:
 
 	var num_turns := gen.count_turns()
 	for i in range(num_turns):
-		var target := chunk_scene.instantiate()
 		var target_color := get_target(i).data.color
-		target.set_from_data(ChunkData.new(target_color))
-		add_child(target)
-		target_list.append(target)
+		color_list.add_target_with_color(target_color)
 	
 	refresh()
 
@@ -46,66 +50,91 @@ func visualize(gen:PuzzleGenerator) -> void:
 func on_visualization_done() -> void:
 	current_turn = 0
 	highlight_target()
+	PuzzleFramework.start_puzzle()
 
 func destroy() -> void:
 	for i in range(potions.size() -1, -1, -1):
 		remove_potion(potions[i])
-	for i in range(target_list.size() -1, -1, -1):
-		remove_target(target_list[i])
+	color_list.destroy()
 
 func add_potion(potion:PotionData) -> void:
 	var p : Potion = potion_scene.instantiate()
-	p.set_from_data(potion)
 	p.clicked.connect(_on_potion_clicked)
 	add_child(p)
 	potions.append(p)
 	
-	for chunk in potion.chunks:
-		var c : Chunk = chunk_scene.instantiate()
-		c.set_from_data(chunk)
-		p.add_chunk(c)
+	p.set_from_data(potion)
 
 func refresh() -> void:
 	var num_potions := potions.size()
 	var offset := -0.5 * (num_potions - 1) * potion_width * Vector2.RIGHT
+	var max_potion_size := Vector2.ZERO
 	for i in range(num_potions):
+		var size := potions[i].get_size()
+		max_potion_size.x = maxf(size.x, max_potion_size.x)
+		max_potion_size.y = maxf(size.y, max_potion_size.y)
 		var pos := offset + i * potion_width * Vector2.RIGHT
 		potions[i].set_position(pos)
 	
-	var num_targets := target_list.size()
-	var target_width := 0.5 * potion_width
-	var offset_targets := -0.5 * (num_targets - 1) * target_width * Vector2.RIGHT + Vector2.DOWN * potion_width
-	for i in range(num_targets):
-		var pos := offset_targets + i * target_width * Vector2.RIGHT
-		target_list[i].set_position(pos)
+	var level_size := Vector2(max_potion_size.x * num_potions, max_potion_size.y)
+	var level_bounds := Rect2(Vector2(-0.5*level_size.x, -level_size.y), level_size)
+	camera.target = level_bounds
 
 func remove_potion(p:Potion) -> void:
 	potions.erase(p)
 	p.queue_free()
 
-func remove_target(t:Chunk) -> void:
-	target_list.erase(t)
-	t.queue_free()
+func get_number_of_turns() -> int:
+	return generator.solution.size()
 
 func get_target(idx:int) -> Potion:
 	return potions[generator.solution[idx].to]
 
+func count_potions() -> int:
+	return potions.size()
+
+func update_turn_number(dt:int) -> void:
+	current_turn += dt
+
 func get_current_target() -> Potion:
 	return get_target(current_turn)
 
-func _on_potion_clicked(p:Potion) -> void:
-	var top_chunk := p.get_top_chunk()
+func get_correct_potions() -> Array[Potion]:
+	return potions.filter(func(p:Potion): return p.is_all_same_color())
+
+func _on_potion_clicked(potion_clicked:Potion) -> void:
 	var current_target := get_current_target()
+	var invalid_move := potion_clicked.is_empty() or potion_clicked == current_target or current_target.is_full()
+	if invalid_move:
+		print("NOPE | Can't do that move.")
+		potion_clicked.on_illegal_click()
+		return
 	
-	p.remove_chunk(top_chunk)
-	current_target.add_chunk(top_chunk)
-	current_turn += 1
+	commands.start_new_turn()
+
+	var cmd := CommandTurn.new(potion_clicked.data, current_target.data)
+	commands.execute_command(cmd)
+	commands.execute_command(CommandTurnEnd.new(self))
+	
+	# @TODO: Update Potion to listen to changes in PotionData and automatically update chunks inside
+	# => Probably more efficient to just have a chunk inside each PotionSegment by default and turn that on/off, right?
+	#p.remove_chunk(top_chunk)
+	#current_target.add_chunk(top_chunk)
+	
+	# check for end of game (and whether we won or not)
+	var is_last_turn := current_turn >= get_number_of_turns()
+	if is_last_turn:
+		var num_potions_correct := get_correct_potions().size()
+		var all_potions_correct := num_potions_correct >= count_potions()
+		PuzzleFramework.finish_puzzle(all_potions_correct)
+		return
+	
 	highlight_target()
 
 func highlight_target() -> void:
 	for potion in potions:
-		potion.set_scale(Vector2.ONE)
-	get_current_target().set_scale(Vector2.ONE * 1.2)
+		potion.set_focus(false)
+	get_current_target().set_focus(true)
 
 #func _on_potion_clicked(p:Potion) -> void:
 	#var chunks_to_add := p.chunks.duplicate(false)

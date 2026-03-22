@@ -1,23 +1,94 @@
 [gd_scene format=3 uid="uid://dq305egab3g5d"]
 
 [ext_resource type="Script" uid="uid://bb005xh5vpvso" path="res://map/potions/potion.gd" id="1_0bsar"]
-[ext_resource type="Texture2D" uid="uid://dlj0v6dtfyxpl" path="res://icon.svg" id="2_8uuxj"]
+[ext_resource type="PackedScene" uid="uid://qthtu18xkcx5" path="res://map/potions/segments/potion_segment.tscn" id="2_0bsar"]
+[ext_resource type="AudioStream" uid="uid://d3v8u25xskc3a" path="res://puzzle-framework/game/sfx/error.ogg" id="3_8uuxj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0bsar"]
 size = Vector2(65, 297)
 
-[node name="Potion" type="Node2D" unique_id=456152568 node_paths=PackedStringArray("vial", "area")]
-script = ExtResource("1_0bsar")
-vial = NodePath("Vial")
-area = NodePath("Area2D")
+[sub_resource type="Animation" id="Animation_0bsar"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SegmentContainer:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("SegmentContainer:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
 
-[node name="Vial" type="Sprite2D" parent="." unique_id=1587741077]
-position = Vector2(0, -139.99998)
-scale = Vector2(0.359375, 2.15625)
-texture = ExtResource("2_8uuxj")
+[sub_resource type="Animation" id="Animation_8uuxj"]
+resource_name = "highlighted"
+length = 2.0
+loop_mode = 1
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SegmentContainer:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, -16)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("SegmentContainer:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.8, 0.90000004, 1, 1.1, 1.2, 1.3000001, 2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.0, -0.017453292519943295, 0.017453292519943295, -0.017453292, 0.017453292, 0.0, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_4xx6i"]
+_data = {
+&"RESET": SubResource("Animation_0bsar"),
+&"highlighted": SubResource("Animation_8uuxj")
+}
+
+[node name="Potion" type="Node2D" unique_id=456152568 node_paths=PackedStringArray("segment_container", "anim_player", "area", "area_shape", "audio_error")]
+script = ExtResource("1_0bsar")
+segment_scene = ExtResource("2_0bsar")
+segment_container = NodePath("SegmentContainer")
+anim_player = NodePath("AnimationPlayer")
+area = NodePath("Area2D")
+area_shape = NodePath("Area2D/CollisionShape2D")
+audio_error = NodePath("AudioError")
+
+[node name="SegmentContainer" type="Node2D" parent="." unique_id=67632442]
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1109203858]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1422832720]
 position = Vector2(-1.5, -138.5)
 shape = SubResource("RectangleShape2D_0bsar")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=574601122]
+libraries/ = SubResource("AnimationLibrary_4xx6i")
+
+[node name="AudioError" type="AudioStreamPlayer2D" parent="." unique_id=1803499466]
+stream = ExtResource("3_8uuxj")

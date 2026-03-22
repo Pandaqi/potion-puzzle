@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="PuzzleDifficulty" format=3 uid="uid://dyrner0s6st6f"]
+
+[ext_resource type="Script" uid="uid://7a03fervi8xj" path="res://puzzle-framework/puzzle_difficulty.gd" id="1_13r8w"]
+
+[resource]
+script = ExtResource("1_13r8w")
+metadata/_custom_type_script = "uid://7a03fervi8xj"

@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://dd4tn7wcmhide"]
 
 [ext_resource type="Script" uid="uid://bsb3uy7da6qck" path="res://map/chunks/chunk.gd" id="1_nxmao"]
-[ext_resource type="Texture2D" uid="uid://dlj0v6dtfyxpl" path="res://icon.svg" id="2_phim5"]
+[ext_resource type="Texture2D" uid="uid://dssrybcfk8vai" path="res://map/chunks/potion-ball.png" id="2_nxmao"]
 
 [node name="Chunk" type="Node2D" unique_id=1059585719 node_paths=PackedStringArray("sprite")]
 script = ExtResource("1_nxmao")
 sprite = NodePath("Sprite2D")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=469249480]
-scale = Vector2(0.25, 0.25)
-texture = ExtResource("2_phim5")
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("2_nxmao")

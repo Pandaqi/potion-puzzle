@@ -1,3 +1,4 @@
+extends RefCounted
 class_name PotionData
 
 var chunks : Array[ChunkData] = []
@@ -9,6 +10,8 @@ var color : ChunkData.ColorName
 ## Index in the original puzzle array of potions
 var index := -1
 
+signal changed()
+
 func _init(s:int) -> void:
 	max_size = s
 
@@ -18,9 +21,11 @@ func add_chunks(c:Array[ChunkData]) -> void:
 
 func add_chunk(c:ChunkData) -> void:
 	chunks.append(c)
+	changed.emit()
 
 func remove_chunk(c:ChunkData) -> void:
 	chunks.erase(c)
+	changed.emit()
 
 func remove_chunks(c:Array[ChunkData]) -> void:
 	for chunk in c:
