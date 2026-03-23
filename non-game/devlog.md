@@ -166,6 +166,30 @@ We can improve this a bit more by ...
 
 Then I had to do the usual honors in terms of adding some animations, sound effects, menu, buttons, and all that jazz. And we have a puzzle game!
 
+In another devlog about these puzzle games, I explained how I seperate "data/logic" and "visuals/effects" completely. The puzzle generation works with a `PotionData` object that is just a bunch of numbers and colors ( = what's inside the potion). When you play the game, you're looking at `PotionVisual` objects that merely _read_ the data and _react when it changes_.
+
+This makes code very clean and obvious. It basically circumvents most of the bugs or annoyances you might get otherwise, while it makes you very flexible. (For example, I can try three different potion visuals by just swapping out that part only.)
+
+I just wanted to give a more specific example here about _how_ to "react to data changes".
+
+Sometimes this is simple. Maybe you clicked a square to change its color, then I can just let the visual gradually move to the new color. (Animate it, or "tween" it.) It doesn't matter how it happened, it doesn't matter what our previous color was, we can just move to the one that the data says right now.
+
+But sometimes we have to track things **appearing and disappearing**. For example, colors being _added_ to the potion or _removed_ from them. How do we know this happened? The data only says "currently I have these colors!" How do we know that we need to play an animation to add a color because it's new, as opposed to a color that's been inside the potion for multiple turns?
+
+In most cases, this means the _visual side_ is responsible for **tracking (old) state**. In this case,
+
+* At the _end_ of reacting to updates, the `PotionVisual` saves all currently visible colors in some variable (e.g. `last_known_colors`). That's how it remembers the important details about the last change.
+* When the next call to update comes---remember: this signal is sent by PotionData whenever it changes---it _compares_ the current data to the last known data.
+  * A color is **not** in `last_known_colors`, but it **is** in `PotionData.colors`? Then it's new! Play an animation to make it appear, play a sound that something was added!
+  * A color **is** in `last_known_colors`, but it is **not** in `PotionData.colors`? Then it has just been removed! Play the disappear animation!
+
+In a way, the visual side just adds a bit more data of its own so it can make the right decisions about the original data. And yes, you _could_ let `PotionData` track old states too, but I don't like that because ...
+
+* It's not their responsibility. They'd be tracking states for _the visual side_ only, never using it themselves. Which means you're adding fluff to all potion data, adding weight, without purpose.
+* Data objects should just be raw numbers and, well, _data_. The more you program, the more you realize that _everything starts with data_ and that you can save yourself a lot of headaches by _letting it stay simple data_. I would always opt for moving any logic or extra stuff to other scripts that _act_ on the data. Such as the `PotionVisual` script that _acts_ on the underlying potion to visualize it nicely.
+
+I don't want to get too technical here. But nuggets of wisdom like this may help out other game developers / aspiring puzzle designers. (More so than large courses or specific tutorials or whatever.) Things like this ("religiously separate data and visuals") are what allow me to create such puzzle games in a day and be completely certain they work. Whilst ten years ago, I probably would have written some messy code that did everything at once, and would have spent two weeks getting it functional without any reliability ;)
+
 ## Conclusion
 
 If you take anything away from this devlog/diary, let it be three things.
@@ -189,34 +213,48 @@ Pandaqi
 
 Architecture / Logic / Generation
 
-* Potions should react to PotionData changes
-* Just have a permanent Chunk inside PotionSegment -> show/hide (and recolor) as needed
+* Algorithm: prefer picking from the _same potion_ multiple times in a row, to make it emptier (instead of re-shuffling the top Chunks all the time)
+* Algorithm: forbid doing the same move as last turn (but in reverse)
+* Algorithm: allow varying potion max sizes?
 * Simulation Checks (enough variation at start, no save state revisiting)
 
 Graphics
 
+* Push balls/chunks closer together vertically?
 * Fix tiny Potion issues: center should not extend into top, edges don't perfectly align, etc
-* Add Balatro-like painerly swirl as background? => Yes, and then use the current target color as the colors to swirl!
+* Add Balatro-like painterly swirl as background? => Yes, and then use the current target color as the colors to swirl!
 * Add the "shine" shader to both PotionSmall and Target potion again?
 * Tween the ball actually moving from one potion to another
 * Tween changes in PotionSmall active
 * Some smaller tweens for nicety (such as small ball rotations, small reaction to hover over potion, etc)
+  * => YES absolutely react to hover, otherwise players will be tempted to press the one that's shaking (target potion)
+  * Also give TEXT feedback on pressing that? Or display some arrow or "Target Potion" text permanently?
+  * And give TEXT/IMAGE feedback on "This potion is FULL"? => Maybe some subtle sound effect when it happens + some animation that plays while a potion is full. => Or just display a subtle "lock" or something on it while full => **Put the cork into it!**
 * Sound Effects: Tap Potion, Ball Move?
 
 Finishing Touches
 
 * Five difficulty levels
+* Tutorial??
+* Narrate Colors
 * @IDEA: Can we involve actual _color mixing_ somehow as the final difficulty?
 
 
 
 @SOURCE: Great website to compress WebM I record for these video games => https://www.xconvert.com/compress-webm
 
+@SOURCE: Turn recursive backtracker into iterative? 
+* https://stackoverflow.com/questions/13782136/can-a-backtracking-tail-recursive-algorithm-be-converted-to-iteration -->
+* https://stackoverflow.com/questions/20514267/how-can-i-collect-and-return-solutions-from-a-recursive-backtracking-algorithm/20531704#20531704
 
 
 PuzzleFramework:
 
+* Button to PLAY THE SOLUTION -> I can hide that in the game itself but at least use it for my own debugging
+* Allow setting favicon so we can load that (or at least briefly animate/show) on the Menu?
+  * Maybe just a subtle permanent place in the bottom-right corner?
 * Write some short docs on the few steps to take to _integrate the framework_ in each new game.
 * Actually _save_ user settings between sessions? (And save other data, like completed puzzles/highscore/etc?)
 * Even more generic tutorial support?
 * Localization (both text and audio)
+* Easy recolor background pattern menu

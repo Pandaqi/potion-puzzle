@@ -8,3 +8,8 @@ var data : ChunkData
 func set_from_data(cd:ChunkData) -> void:
 	data = cd
 	sprite.modulate = cd.get_color_as_object()
+	show()
+
+func unset_data() -> void:
+	hide()
+	data = null

@@ -19,13 +19,13 @@ script = ExtResource("2_4dugh")
 edge_margin = Vector2(96, 96)
 metadata/_custom_type_script = "uid://haho73xq30yv"
 
-[node name="PuzzleVisualizer" type="Node2D" parent="." unique_id=671800585 node_paths=PackedStringArray("color_list", "camera", "audio_error")]
+[node name="PuzzleVisualizer" type="Node2D" parent="." unique_id=671800585 node_paths=PackedStringArray("color_list", "camera", "game_menu")]
 script = ExtResource("2_pjrb6")
 potion_scene = ExtResource("3_c651c")
 chunk_scene = ExtResource("3_3wy1v")
 color_list = NodePath("../ColorList/ColorList")
 camera = NodePath("../PuzzleCamera")
-audio_error = NodePath("")
+game_menu = NodePath("../GameMenu")
 
 [node name="ColorList" type="CanvasLayer" parent="." unique_id=1609420534]
 

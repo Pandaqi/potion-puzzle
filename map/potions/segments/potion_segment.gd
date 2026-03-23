@@ -3,9 +3,10 @@ class_name PotionSegment
 
 @export var base : Sprite2D
 @export var center : Sprite2D
+@export var chunk : Chunk
 @export var overlay : Sprite2D
+
 var active := false
-var chunk : Chunk
 
 enum Type
 {
@@ -43,20 +44,8 @@ func get_size() -> Vector2:
 func has_chunk() -> bool:
 	return chunk != null
 
-func link_chunk(c:Chunk) -> void:
-	if has_chunk():
-		print("Error! Already have a chunk!")
-		return
-	
-	chunk = c
-	add_child(c)
-	c.set_position(Vector2.ZERO)
-	chunk.z_index = 20 # 0 = base, 10 = center, 30 = overlay
+func link_chunk(c:ChunkData) -> void:
+	chunk.set_from_data(c)
 
 func unlink_chunk() -> void:
-	if not has_chunk(): 
-		print("Error! No chunk to unlink!")
-		return
-	
-	remove_child(chunk)
-	chunk = null
+	chunk.unset_data()

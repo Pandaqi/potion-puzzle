@@ -41,7 +41,7 @@ static func convert_color_to_object(c:ColorName) -> Color:
 	if c == ColorName.ORANGE: return Color.ORANGE
 	if c == ColorName.PURPLE: return Color.PURPLE
 	if c == ColorName.YELLOW: return Color.YELLOW
-	if c == ColorName.BLACK: return Color.BLACK
+	if c == ColorName.BLACK: return Color(0.25, 0.25, 0.25)
 	if c == ColorName.WHITE: return Color.WHITE
 	return Color.WHITE
 

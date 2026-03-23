@@ -40,22 +40,16 @@ func set_focus(fc:bool) -> void:
 	if not fc: anim_player.stop(false)
 	else: anim_player.play("highlighted")
 
+func count() -> int:
+	return data.count()
+
 func is_empty() -> bool:
-	return data.count() <= 0
+	return count() <= 0
 
 func is_full() -> bool:
-	return data.count() >= data.max_size
-
-func is_all_same_color() -> bool:
-	if count() <= 1: return true
-	
-	var first_color : ChunkData.ColorName = chunks.front().data.color
-	for i in range(1, count()):
-		if chunks[i].data.color != first_color: return false
-	return true
+	return count() >= data.max_size
 
 func refresh() -> void:
-	var num_chunks := data.count()
 	
 	# add potion segments as needed
 	var max_potion_size := data.max_size
@@ -97,10 +91,10 @@ func refresh() -> void:
 		highest_segment_position = pos
 		segment.set_position(pos)
 		
-		# @TODO: rewrite to just enabling/disabling/recoloring chunks already within the segment
-		# insert chunks as needed
-		if type == PotionSegment.Type.MIDDLE and (i-1) < num_chunks:
-			segment.link_chunk(chunks[i - 1])
+		# link to the chunks in our data
+		segment.unlink_chunk()
+		if type == PotionSegment.Type.MIDDLE and (i-1) < count():
+			segment.link_chunk(data.chunks[i-1])
 	
 	# resize area to match height
 	var total_height := absf(highest_segment_position.y)

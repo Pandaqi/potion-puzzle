@@ -6,7 +6,7 @@ class_name PuzzleVisualizer
 @export var color_list : ColorList
 @export var camera : PuzzleCamera
 
-@export var audio_error : AudioStreamPlayer2D
+@export var game_menu : PuzzleGameMenu
 
 var potion_width := 256.0
 var potions : Array[Potion] = []
@@ -31,6 +31,7 @@ func visualize(gen:PuzzleGenerator) -> void:
 	
 	commands = PuzzleCommands.new()
 	add_child(commands)
+	game_menu.commands = commands
 	
 	destroy()
 	
@@ -88,6 +89,7 @@ func get_number_of_turns() -> int:
 	return generator.solution.size()
 
 func get_target(idx:int) -> Potion:
+	idx = clampi(idx, 0, generator.solution.size()-1)
 	return potions[generator.solution[idx].to]
 
 func count_potions() -> int:
@@ -95,12 +97,13 @@ func count_potions() -> int:
 
 func update_turn_number(dt:int) -> void:
 	current_turn += dt
+	highlight_target()
 
 func get_current_target() -> Potion:
 	return get_target(current_turn)
 
 func get_correct_potions() -> Array[Potion]:
-	return potions.filter(func(p:Potion): return p.is_all_same_color())
+	return potions.filter(func(p:Potion): return p.data.is_all_same_color())
 
 func _on_potion_clicked(potion_clicked:Potion) -> void:
 	var current_target := get_current_target()
@@ -128,8 +131,6 @@ func _on_potion_clicked(potion_clicked:Potion) -> void:
 		var all_potions_correct := num_potions_correct >= count_potions()
 		PuzzleFramework.finish_puzzle(all_potions_correct)
 		return
-	
-	highlight_target()
 
 func highlight_target() -> void:
 	for potion in potions:

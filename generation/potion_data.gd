@@ -84,4 +84,11 @@ func get_neighbor_chunks(c:ChunkData) -> Array[ChunkData]:
 	if idx < (count() - 1):
 		nbs.append(chunks[idx+1])
 	return nbs
+
+func is_all_same_color() -> bool:
+	if count() <= 1: return true
 	
+	var first_color : ChunkData.ColorName = chunks.front().color
+	for i in range(1, count()):
+		if chunks[i].color != first_color: return false
+	return true
