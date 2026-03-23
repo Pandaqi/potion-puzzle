@@ -51,6 +51,7 @@ func execute_command(cmd:PuzzleCommand) -> void:
 
 func undo_last_turn() -> void:
 	if not has_turns(): return
+	if is_busy(): return
 	
 	busy = true
 	undo_started.emit()

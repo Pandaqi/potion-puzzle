@@ -4,4 +4,10 @@
 
 [resource]
 script = ExtResource("1_13r8w")
+properties = Dictionary[String, Variant]({
+"num_moves_bounds": Vector2i(2, 4),
+"num_potion_bounds": Vector2i(2, 3),
+"potion_size_bounds": Vector2i(2, 3),
+"potion_start_contents_bounds": Vector2i(1, 2)
+})
 metadata/_custom_type_script = "uid://7a03fervi8xj"

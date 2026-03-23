@@ -64,6 +64,20 @@ func get_space_available() -> int:
 func count() -> int:
 	return chunks.size()
 
+func count_wrong() -> int:
+	var num := 0
+	for chunk in chunks:
+		if chunk.color != color:
+			num += 1
+	return num
+
+# @NOTE: We don't need to add the potion color or size as it never changes during play
+func get_hash() -> String:
+	var hs := ""
+	for chunk in chunks:
+		hs += str(chunk.color)
+	return hs
+
 func get_first_chunk() -> ChunkData:
 	return chunks.front()
 

@@ -190,6 +190,14 @@ In a way, the visual side just adds a bit more data of its own so it can make th
 
 I don't want to get too technical here. But nuggets of wisdom like this may help out other game developers / aspiring puzzle designers. (More so than large courses or specific tutorials or whatever.) Things like this ("religiously separate data and visuals") are what allow me to create such puzzle games in a day and be completely certain they work. Whilst ten years ago, I probably would have written some messy code that did everything at once, and would have spent two weeks getting it functional without any reliability ;)
 
+## A Lesson In Visuals
+
+@TODO: About the potions looking wrong because their _level of detail_ does not match the smaller potions. In other words: if something will be displayed twice as BIG as everything else, then it should be TWICE AS DETAILED, or it will look incredibly bland/amateur/meh in comparison.
+
+@TODO: Also the Curve trick for tweening parabolas?
+
+
+
 ## Conclusion
 
 If you take anything away from this devlog/diary, let it be three things.
@@ -209,34 +217,87 @@ Pandaqi
 
 
 
+## Difficulties
+
+### Easiest
+
+* num_potion_bounds = (2,3)
+* potion_size_bounds = (2,3)
+* potion_start_contents_bounds = (1,2)
+* num_moves_bounds = (2,4)
+* allow_different_potion_sizes = false
+
+### Easy
+
+* num_potion_bounds = (3,4)
+* potion_size_bounds = (3,4)
+* potion_start_contents_bounds = (1,3)
+* num_moves_bounds = (3,5)
+* allow_different_potion_sizes = false
+
+### Medium
+
+* num_potion_bounds = (4,6)
+* potion_size_bounds = (3,6)
+* potion_start_contents_bounds = (2,4)
+* num_moves_bounds = (6,9)
+* allow_different_potion_sizes = false
+
+### Hard
+
+* num_potion_bounds = (4,6)
+* potion_size_bounds = (4,5)
+* allow_different_potion_sizes = true
+* potion_start_contents_bounds = (2,4)
+* num_moves_bounds = (8,10)
+* initial_state_diversity_factor = 0.5
+* prefer_deep_grab_probability = 0.5
+
+### Hardest
+
+* num_potion_bounds = (6,8)
+* potion_size_bounds = (4,6)
+* allow_different_potion_sizes = true
+* potion_start_contents_bounds = (2,5)
+* num_moves_bounds = (10,14)
+* initial_state_diversity_factor = 0.5
+* prefer_deep_grab_probability = 0.5
+
+
+
 ## @TODO
 
-Architecture / Logic / Generation
-
-* Algorithm: prefer picking from the _same potion_ multiple times in a row, to make it emptier (instead of re-shuffling the top Chunks all the time)
-* Algorithm: forbid doing the same move as last turn (but in reverse)
-* Algorithm: allow varying potion max sizes?
-* Simulation Checks (enough variation at start, no save state revisiting)
 
 Graphics
 
-* Push balls/chunks closer together vertically?
-* Fix tiny Potion issues: center should not extend into top, edges don't perfectly align, etc
-* Add Balatro-like painterly swirl as background? => Yes, and then use the current target color as the colors to swirl!
-* Add the "shine" shader to both PotionSmall and Target potion again?
-* Tween the ball actually moving from one potion to another
-* Tween changes in PotionSmall active
-* Some smaller tweens for nicety (such as small ball rotations, small reaction to hover over potion, etc)
-  * => YES absolutely react to hover, otherwise players will be tempted to press the one that's shaking (target potion)
+* POTION OVERLAY => Make the chunks connect into one thing, make slightly more transparent/blueish to match background. 
+  * Give slightly more detail to overall potions still?
+* CHUNKS
+  * Create them in different shapes
+  * Split the ball and its blobby overlay -> so we can shift the overlay around like floating bubbles too.
+    * Potentially REMOVE THE OUTLINE
+* SHAPE VERSION:
+  * Behind the scenes, it still uses `color`.
+  * But we simply display the ball SHAPES (ColorName.WHITE -> ShapeName.SQUARE etc mapping)
+  * Each potion shows the right shape at the bottom => use circular bottom now! => does require changing the HEIGHT calculation/offset for potions probably!
+  * Modulate the potion's color randomly
+  * WHAT TO DO WITH SMALL POTIONS?
+  * Play the audio for _shape names_ if `narrate_colors` is on.
+* FEEDBACK:
   * Also give TEXT feedback on pressing that? Or display some arrow or "Target Potion" text permanently?
   * And give TEXT/IMAGE feedback on "This potion is FULL"? => Maybe some subtle sound effect when it happens + some animation that plays while a potion is full. => Or just display a subtle "lock" or something on it while full => **Put the cork into it!**
-* Sound Effects: Tap Potion, Ball Move?
 
 Finishing Touches
 
-* Five difficulty levels
-* Tutorial??
-* Narrate Colors
+* Finish this devlog (@TODO parts)
+* Some glitchiness with fast undoing, things not being removed when they should. (Maybe initialization call is wonky/different now?)
+* Tutorial
+  * Merely point at the right first move now (the target potion already wiggles)
+  * Try adding an AUDIO explanation? "Make all balls inside a potion the same color. Click a potion to move its top ball to the wiggly target potion."
+  * I mean how else are you going to explain that concept with images only?
+
+Stretch Goals:
+
 * @IDEA: Can we involve actual _color mixing_ somehow as the final difficulty?
 
 
@@ -251,6 +312,7 @@ Finishing Touches
 PuzzleFramework:
 
 * Button to PLAY THE SOLUTION -> I can hide that in the game itself but at least use it for my own debugging
+  * Maybe more like a "HINT" system?
 * Allow setting favicon so we can load that (or at least briefly animate/show) on the Menu?
   * Maybe just a subtle permanent place in the bottom-right corner?
 * Write some short docs on the few steps to take to _integrate the framework_ in each new game.
@@ -258,3 +320,6 @@ PuzzleFramework:
 * Even more generic tutorial support?
 * Localization (both text and audio)
 * Easy recolor background pattern menu
+* Show the SEED / NAME of the current puzzle? In case I want to remember/reuse?
+* Settings =>
+  * Add TOOLTIP again

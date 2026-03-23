@@ -2,6 +2,9 @@ extends Node2D
 class_name Potion
 
 var data : PotionData
+var size : Vector2
+var hovering := false
+var is_current_target := false
 
 var segments : Array[PotionSegment] = []
 @export var segment_scene : PackedScene
@@ -12,11 +15,14 @@ var segments : Array[PotionSegment] = []
 @export var area_shape : CollisionShape2D
 
 @export var audio_error : AudioStreamPlayer2D
+@export var audio_click : AudioStreamPlayer2D
 
 signal clicked(p:Potion)
 
 func _ready() -> void:
 	area.input_event.connect(_on_input_event)
+	area.mouse_entered.connect(_on_mouse_entered)
+	area.mouse_exited.connect(_on_mouse_exited)
 	area_shape.shape = RectangleShape2D.new()
 
 func _on_input_event(_vp:Node, ev:InputEvent, _shape_idx:int) -> void:
@@ -30,13 +36,35 @@ func set_from_data(pd:PotionData) -> void:
 	refresh()
 
 func get_size() -> Vector2:
-	return area_shape.shape.size
+	return size
 
 func on_illegal_click() -> void:
 	PuzzleAudio.play_audio_nice(audio_error)
 	PuzzleTween.play_wiggle_tween(self)
 
+func on_legal_click() -> void:
+	PuzzleAudio.play_audio_nice(audio_click)
+
+func _process(dt:float) -> void:
+	animate_hover(dt)
+
+func animate_hover(dt:float) -> void:
+	if is_current_target: return
+	
+	var target_y := -12.0 if hovering else 0.0
+	var target_modulate := Color(1.15, 1.15, 1.15) if hovering else Color.WHITE
+	self.modulate = modulate.lerp(target_modulate, 8*dt)
+	self.position.y = lerpf(position.y, target_y, 8*dt)
+
+func _on_mouse_entered() -> void:
+	hovering = true
+
+func _on_mouse_exited() -> void:
+	hovering = false
+
 func set_focus(fc:bool) -> void:
+	is_current_target = fc
+	if PuzzleFramework.get_setting_value("wiggle_target") != true: return
 	if not fc: anim_player.stop(false)
 	else: anim_player.play("highlighted")
 
@@ -48,6 +76,9 @@ func is_empty() -> bool:
 
 func is_full() -> bool:
 	return count() >= data.max_size
+
+func get_position_of_top() -> Vector2:
+	return global_position + Vector2(0, -size.y)
 
 func refresh() -> void:
 	
@@ -98,8 +129,10 @@ func refresh() -> void:
 	
 	# resize area to match height
 	var total_height := absf(highest_segment_position.y)
+	size = Vector2(max_segment_width, total_height)
+	
 	area_shape.position.y = -0.5*total_height
-	area_shape.shape.size = Vector2(max_segment_width, total_height)
+	area_shape.shape.size = size
 
 #func reduce_by_matches() -> void:
 	## first count how often each one exists

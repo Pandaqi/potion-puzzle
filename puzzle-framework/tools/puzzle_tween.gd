@@ -22,6 +22,8 @@ static func play_wiggle_tween(obj:Node2D, amp_bounds := Vector2(0.02, 0.04)) -> 
 	return tw
 
 static func force_tween_completion(tw:Tween, dur := 10.0) -> void:
+	if not tw.is_running(): return
+	
 	tw.pause()
 	tw.custom_step(dur)
 

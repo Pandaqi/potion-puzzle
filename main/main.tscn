@@ -2,30 +2,44 @@
 
 [ext_resource type="Script" uid="uid://gqvjxuo32f4b" path="res://main/main.gd" id="1_53q0u"]
 [ext_resource type="Script" uid="uid://haho73xq30yv" path="res://puzzle-framework/tools/camera.gd" id="2_4dugh"]
+[ext_resource type="PackedScene" uid="uid://bv7ebet8syj1d" path="res://map/background/background.tscn" id="2_fwcvl"]
 [ext_resource type="Script" uid="uid://ckkhwc0cjwhdy" path="res://map/puzzle_visualizer.gd" id="2_pjrb6"]
 [ext_resource type="PackedScene" uid="uid://dd4tn7wcmhide" path="res://map/chunks/chunk.tscn" id="3_3wy1v"]
 [ext_resource type="PackedScene" uid="uid://dq305egab3g5d" path="res://map/potions/potion.tscn" id="3_c651c"]
 [ext_resource type="Script" uid="uid://dunkj8jdwq8ju" path="res://map/potions-small/color_list.gd" id="5_3wy1v"]
+[ext_resource type="Curve" uid="uid://6jfn4qwx3mki" path="res://map/chunks/jump_curve.tres" id="6_0i4oc"]
 [ext_resource type="PackedScene" uid="uid://b4s586o3h3abd" path="res://map/potions-small/potion_small.tscn" id="6_kfbq2"]
 [ext_resource type="PackedScene" uid="uid://q1jom8bphw8d" path="res://puzzle-framework/gameover/game_over_dialog.tscn" id="8_67ri8"]
 [ext_resource type="PackedScene" uid="uid://2xygcypttdo7" path="res://puzzle-framework/game/game_menu.tscn" id="9_grrlh"]
+[ext_resource type="AudioStream" uid="uid://cahjwhx61vvd1" path="res://puzzle-framework/game/sfx/whoosh_1.ogg" id="9_na0o7"]
 
 [node name="Main" type="Node2D" unique_id=833826901 node_paths=PackedStringArray("vis")]
 script = ExtResource("1_53q0u")
 vis = NodePath("PuzzleVisualizer")
+
+[node name="Background" parent="." unique_id=36260078 instance=ExtResource("2_fwcvl")]
 
 [node name="PuzzleCamera" type="Camera2D" parent="." unique_id=100939459]
 script = ExtResource("2_4dugh")
 edge_margin = Vector2(96, 96)
 metadata/_custom_type_script = "uid://haho73xq30yv"
 
-[node name="PuzzleVisualizer" type="Node2D" parent="." unique_id=671800585 node_paths=PackedStringArray("color_list", "camera", "game_menu")]
+[node name="PuzzleVisualizer" type="Node2D" parent="." unique_id=671800585 node_paths=PackedStringArray("color_list", "camera", "game_menu", "background", "audio_whoosh", "audio_narrate")]
 script = ExtResource("2_pjrb6")
 potion_scene = ExtResource("3_c651c")
 chunk_scene = ExtResource("3_3wy1v")
 color_list = NodePath("../ColorList/ColorList")
 camera = NodePath("../PuzzleCamera")
 game_menu = NodePath("../GameMenu")
+background = NodePath("../Background")
+audio_whoosh = NodePath("AudioWhoosh")
+audio_narrate = NodePath("AudioNarrate")
+curve_jump = ExtResource("6_0i4oc")
+
+[node name="AudioWhoosh" type="AudioStreamPlayer2D" parent="PuzzleVisualizer" unique_id=1230768916]
+stream = ExtResource("9_na0o7")
+
+[node name="AudioNarrate" type="AudioStreamPlayer" parent="PuzzleVisualizer" unique_id=2078478839]
 
 [node name="ColorList" type="CanvasLayer" parent="." unique_id=1609420534]
 

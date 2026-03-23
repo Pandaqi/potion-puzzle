@@ -41,3 +41,13 @@ func remove_target(target:PotionSmall) -> void:
 func destroy() -> void:
 	for i in range(list.size() -1, -1, -1):
 		remove_target(list[i])
+
+func disappear() -> void:
+	for target in list:
+		target.unfocus()
+		PuzzleTween.play_popdown_tween(target)
+
+func highlight_target(turn:int) -> void:
+	for target in list:
+		target.unfocus()
+	list[turn].focus()

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PuzzleDifficulty" format=3 uid="uid://mf85haphvb6x"]
+
+[ext_resource type="Script" uid="uid://7a03fervi8xj" path="res://puzzle-framework/puzzle_difficulty.gd" id="1_sf2im"]
+
+[resource]
+script = ExtResource("1_sf2im")
+difficulty = 2
+properties = Dictionary[String, Variant]({
+"num_moves_bounds": Vector2i(6, 9),
+"num_potion_bounds": Vector2i(4, 6),
+"potion_size_bounds": Vector2i(3, 6),
+"potion_start_contents_bounds": Vector2i(2, 4)
+})
+metadata/_custom_type_script = "uid://7a03fervi8xj"

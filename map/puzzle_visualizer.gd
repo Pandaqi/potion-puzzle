@@ -7,36 +7,78 @@ class_name PuzzleVisualizer
 @export var camera : PuzzleCamera
 
 @export var game_menu : PuzzleGameMenu
+@export var background : Background
+
+@export var audio_whoosh : AudioStreamPlayer2D
+@export var audio_narrate : AudioStreamPlayer
+
+@export var curve_jump : Curve
 
 var potion_width := 256.0
 var potions : Array[Potion] = []
 var generator : PuzzleGenerator
-var commands : PuzzleCommands
+var commands : Commands
+var busy := false
 
 var history_index := -1
-var current_turn := -1
+var current_turn := 0
 
-func _input(ev:InputEvent) -> void:
-	if ev.is_action_released("ui_left"):
-		goto_puzzle_state(-1)
-	if ev.is_action_released("ui_right"):
-		goto_puzzle_state(+1)
+var jump_tween_active : Tween
 
-func goto_puzzle_state(ds:int) -> void:
-	history_index = clampi(history_index + ds, -1, generator.history.size() - 1)
-	visualize(generator)
+func play_chunk_transfer_tween(from:PotionData, chunk:ChunkData, to:PotionData) -> void:
+	if jump_tween_active:
+		PuzzleTween.force_tween_completion(jump_tween_active)
+	
+	var pos1 := get_potion_for_data(from).get_position_of_top()
+	var pos2 := get_potion_for_data(to).get_position_of_top()
+	
+	var distance_between := pos2.distance_to(pos1)
+	var distance_factor := maxf(distance_between / 256.0, 1.0)
+	var jump_height := 64.0 * distance_factor
+	
+	var mid_pos := 0.5 * (pos1 + pos2) + Vector2.UP * jump_height
+	
+	var new_chunk : Chunk = chunk_scene.instantiate()
+	add_child(new_chunk)
+	new_chunk.set_from_data(chunk)
+	new_chunk.set_position(pos1)
+	new_chunk.z_index = 1024
+	
+	audio_whoosh.set_position(pos1)
+	audio_whoosh.play()
+	
+	var tw := get_tree().create_tween().set_trans(Tween.TRANS_LINEAR)
+	var dur := randf_range(0.1, 0.15) * distance_factor
+	
+	var num_points_sampled := 10
+	
+	# we use a parabola curve to make the trajectory match it
+	# the x position represents "time"; 
+	# the curve's value at that time represents how close it is to the higher midpoint
+	for i in range(num_points_sampled):
+		var factor := (i+1.0) / num_points_sampled
+		var x_pos := lerpf(pos1.x, pos2.x, factor)
+		var y_pos_anchor := pos1.y if x_pos < mid_pos.x else pos2.y
+		var y_pos := lerpf(y_pos_anchor, mid_pos.y, curve_jump.sample(factor))
+		tw.tween_property(new_chunk, "position", Vector2(x_pos, y_pos), dur / num_points_sampled)
+	jump_tween_active = tw
+	
+	await tw.finished
+	new_chunk.queue_free()
+
+func get_potion_for_data(d:PotionData) -> Potion:
+	for potion in potions:
+		if potion.data == d: return potion
+	return null
 
 func visualize(gen:PuzzleGenerator) -> void:
 	generator = gen
 	
-	commands = PuzzleCommands.new()
+	commands = Commands.new(self)
 	add_child(commands)
 	game_menu.commands = commands
 	
-	destroy()
-	
-	var state_to_visualize := gen.history[mini(history_index, gen.history.size()-1)]
-	for potion in state_to_visualize:
+	for potion in gen.potions:
 		add_potion(potion)
 
 	var num_turns := gen.count_turns()
@@ -49,14 +91,8 @@ func visualize(gen:PuzzleGenerator) -> void:
 	on_visualization_done()
 
 func on_visualization_done() -> void:
-	current_turn = 0
-	highlight_target()
+	update_turn_number(0)
 	PuzzleFramework.start_puzzle()
-
-func destroy() -> void:
-	for i in range(potions.size() -1, -1, -1):
-		remove_potion(potions[i])
-	color_list.destroy()
 
 func add_potion(potion:PotionData) -> void:
 	var p : Potion = potion_scene.instantiate()
@@ -78,6 +114,7 @@ func refresh() -> void:
 		potions[i].set_position(pos)
 	
 	var level_size := Vector2(max_potion_size.x * num_potions, max_potion_size.y)
+	level_size.y = maxf(level_size.y, 768.0) # ensure we don't zoom in TOO MUCH on tiny levels
 	var level_bounds := Rect2(Vector2(-0.5*level_size.x, -level_size.y), level_size)
 	camera.target = level_bounds
 
@@ -89,7 +126,6 @@ func get_number_of_turns() -> int:
 	return generator.solution.size()
 
 func get_target(idx:int) -> Potion:
-	idx = clampi(idx, 0, generator.solution.size()-1)
 	return potions[generator.solution[idx].to]
 
 func count_potions() -> int:
@@ -99,13 +135,21 @@ func update_turn_number(dt:int) -> void:
 	current_turn += dt
 	highlight_target()
 
+func is_done() -> bool:
+	return current_turn >= get_number_of_turns()
+
+func get_current_turn() -> int:
+	return clampi(current_turn, 0, generator.solution.size()-1)
+
 func get_current_target() -> Potion:
-	return get_target(current_turn)
+	return get_target(get_current_turn())
 
 func get_correct_potions() -> Array[Potion]:
 	return potions.filter(func(p:Potion): return p.data.is_all_same_color())
 
 func _on_potion_clicked(potion_clicked:Potion) -> void:
+	if commands.is_busy() or busy: return
+	
 	var current_target := get_current_target()
 	var invalid_move := potion_clicked.is_empty() or potion_clicked == current_target or current_target.is_full()
 	if invalid_move:
@@ -113,29 +157,46 @@ func _on_potion_clicked(potion_clicked:Potion) -> void:
 		potion_clicked.on_illegal_click()
 		return
 	
+	busy = true
+	potion_clicked.on_legal_click()
+	
 	commands.start_new_turn()
-
 	var cmd := CommandTurn.new(potion_clicked.data, current_target.data)
-	commands.execute_command(cmd)
+	await commands.execute_command(cmd)
 	commands.execute_command(CommandTurnEnd.new(self))
 	
-	# @TODO: Update Potion to listen to changes in PotionData and automatically update chunks inside
-	# => Probably more efficient to just have a chunk inside each PotionSegment by default and turn that on/off, right?
-	#p.remove_chunk(top_chunk)
-	#current_target.add_chunk(top_chunk)
-	
 	# check for end of game (and whether we won or not)
-	var is_last_turn := current_turn >= get_number_of_turns()
-	if is_last_turn:
+	if is_done():
 		var num_potions_correct := get_correct_potions().size()
 		var all_potions_correct := num_potions_correct >= count_potions()
+		await get_tree().create_timer(0.3).timeout
+		busy = false
 		PuzzleFramework.finish_puzzle(all_potions_correct)
+		on_puzzle_finished()
 		return
+	
+	busy = false
+
+func on_puzzle_finished() -> void:
+	for potion in potions:
+		PuzzleTween.play_popdown_tween(potion)
+	color_list.disappear()
 
 func highlight_target() -> void:
+	if is_done(): return
+	
 	for potion in potions:
 		potion.set_focus(false)
-	get_current_target().set_focus(true)
+	
+	var cur_target := get_current_target()
+	cur_target.set_focus(true)
+	background.set_color(cur_target.data.color)
+	
+	color_list.highlight_target(get_current_turn())
+	
+	if PuzzleFramework.get_setting_value("narrate_colors"):
+		audio_narrate.stream = load("res://map/chunks/sounds/" + ChunkData.convert_color_to_audio(cur_target.data.color) + ".ogg")
+		audio_narrate.play()
 
 #func _on_potion_clicked(p:Potion) -> void:
 	#var chunks_to_add := p.chunks.duplicate(false)

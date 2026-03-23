@@ -10,10 +10,10 @@ func create_nodes(container:Control) -> void:
 	subcont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	container.add_child(subcont)
 	
-	subcont.add_child(create_header_node())
-	
 	dropdown = OptionButton.new()
 	subcont.add_child(dropdown)
+	
+	subcont.add_child(create_header_node())
 	
 	dropdown.allow_reselect = true
 	for option in options:

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="PuzzleSettingCheckbox" format=3 uid="uid://c0yosd8ocj6o8"]
+
+[ext_resource type="Script" uid="uid://dhfd6mahjlglv" path="res://puzzle-framework/settings/setting_checkbox.gd" id="1_gkocu"]
+
+[resource]
+script = ExtResource("1_gkocu")
+key = "wiggle_target"
+label = "Wiggle Target Potion"
+default = true
+metadata/_custom_type_script = "uid://dhfd6mahjlglv"

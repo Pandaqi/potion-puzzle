@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="PuzzleSettingCheckbox" format=3 uid="uid://bytgcrjcgd0v4"]
+
+[ext_resource type="Script" uid="uid://dhfd6mahjlglv" path="res://puzzle-framework/settings/setting_checkbox.gd" id="1_67hh0"]
+
+[resource]
+script = ExtResource("1_67hh0")
+key = "narrate_colors"
+label = "Narrate Colors"
+default = true
+metadata/_custom_type_script = "uid://dhfd6mahjlglv"

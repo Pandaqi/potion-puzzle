@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="PuzzleSettingDropdown" format=3 uid="uid://n3ux3sischsn"]
+
+[ext_resource type="Script" uid="uid://cj5qrvnds355q" path="res://puzzle-framework/settings/setting_dropdown.gd" id="1_s74vi"]
+
+[resource]
+script = ExtResource("1_s74vi")
+options = Array[String](["Colors", "Shapes"])
+key = "puzzle_type"
+label = "Puzzle Type / Topic"
+default = "Colors"
+metadata/_custom_type_script = "uid://cj5qrvnds355q"
