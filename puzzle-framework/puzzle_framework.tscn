@@ -17,12 +17,14 @@
 [ext_resource type="Resource" uid="uid://bytgcrjcgd0v4" path="res://generation/settings/setting_narrate_colors.tres" id="15_ftmnh"]
 [ext_resource type="Resource" uid="uid://n3ux3sischsn" path="res://generation/settings/setting_puzzle_type.tres" id="16_w5ts3"]
 [ext_resource type="Resource" uid="uid://c0yosd8ocj6o8" path="res://generation/settings/setting_wiggle_target.tres" id="17_rtetl"]
+[ext_resource type="Resource" uid="uid://cc1gggtbp5lga" path="res://generation/settings/setting_show_cork.tres" id="18_w5ts3"]
 
 [node name="PuzzleFramework" type="Node" unique_id=835186744]
 script = ExtResource("1_57jsw")
 game_name = "Potion Puzzle"
 game_version = "1.1.3"
 game_tagline = "Teaches Colors & Sequencing"
+favicon = "main/potion-puzzle-favicon.png"
 menu_scene_custom = ExtResource("2_xffpj")
 difficulties = Array[ExtResource("3_tgv6f")]([ExtResource("2_swsbt"), ExtResource("4_swsbt"), ExtResource("5_xffpj"), ExtResource("6_tgv6f"), ExtResource("7_qky6c")])
-settings = Array[ExtResource("9_n02j5")]([ExtResource("10_k0h2b"), ExtResource("11_w5xje"), ExtResource("12_ftmnh"), ExtResource("13_w5ts3"), ExtResource("14_rtetl"), ExtResource("15_ftmnh"), ExtResource("16_w5ts3"), ExtResource("17_rtetl")])
+settings = Array[ExtResource("9_n02j5")]([ExtResource("10_k0h2b"), ExtResource("11_w5xje"), ExtResource("12_ftmnh"), ExtResource("13_w5ts3"), ExtResource("14_rtetl"), ExtResource("15_ftmnh"), ExtResource("16_w5ts3"), ExtResource("17_rtetl"), ExtResource("18_w5ts3")])

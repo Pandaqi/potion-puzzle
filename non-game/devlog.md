@@ -190,13 +190,111 @@ In a way, the visual side just adds a bit more data of its own so it can make th
 
 I don't want to get too technical here. But nuggets of wisdom like this may help out other game developers / aspiring puzzle designers. (More so than large courses or specific tutorials or whatever.) Things like this ("religiously separate data and visuals") are what allow me to create such puzzle games in a day and be completely certain they work. Whilst ten years ago, I probably would have written some messy code that did everything at once, and would have spent two weeks getting it functional without any reliability ;)
 
-## A Lesson In Visuals
+## A Lesson In Visuals & Feedback
 
-@TODO: About the potions looking wrong because their _level of detail_ does not match the smaller potions. In other words: if something will be displayed twice as BIG as everything else, then it should be TWICE AS DETAILED, or it will look incredibly bland/amateur/meh in comparison.
+When I thought this game was nearly done ... I got another big lesson in how video games are a visual medium, and how hard it is to create clean visuals and feedback!
 
-@TODO: Also the Curve trick for tweening parabolas?
+### Potion Hopping
 
+At first, when you clicked a potion, each potion just animated its own change.
 
+* The potion you clicked played a short animation to make the chunk disappear.
+* The target potion played a short animation (at the same time) to make that chunk appear at the top.
+
+Despite the animation and nice colors, this still looked very mediocre. It also did not communicate well what was happening; I wasn't sure if kids would understand that the chunk _moved_ from potion A to potion B.
+
+So ... if I want to communicate that movement ... then maybe I should just _actually show the movement_! Duh. Obvious.
+
+* When you click a potion,
+* I grab the current position of the chunk (top of potion A) and the target position (top of potion B)
+* I create a _new_ chunk (that looks exactly like the one you're moving).
+* And I animate it in a nice arc ("parabola") from `posA` to `posB`.
+* Only once it has _arrived at potion B_, do I actually refresh the contents of potion B. 
+* (And delete this extra chunk I created only for the animation.)
+
+Now you actually _see_ the chunk moving. It's still fake, of course, as almost everything in video games is. But it's more than convincing enough to sell the effect and explain what's happening.
+
+This "arc" was actually quite hard to figure out. When animating, by default, you set two properties and the system moves from one to the other in a straight line. But if I did that, then the ball would move from potion A to potion B in a straight line, which looks bad. I wanted the chunk to jump out and fall back down due to gravity.
+
+I eventually figured out the cleanest way to do this, but it took some effort.
+
+* I define a `Curve`. I can simply draw one in my Godot game engine, or you can define a parabola in code (with its top at x=0.5).
+* Now I _sample_ the curve ~10 times. (This was often enough to make it look good.)
+  * Essentially, I say `x=0.1`, `x=0.2`, `x=0.3`, and so forth.
+  * And for each x-coordinate, I ask that curve what the y-coordinate is now (e.g. `x=0.1` gives `curve.sample(0.1) = 0.2`)
+  * Then I get my final y-coordinate by using that number to interpolate between the starting position at the top of my parabola in real coordinates (`y_pos = lerp(y_pos_start, y_pos_top, 0.2)`)
+* And I simply ask the system to animate from the previous point to the next one each time.
+  * More specifically: it's a single tween that animates these little linear movements one after another.
+* I await `tween.finished` and then add the chunk to potion B and signal the movement is done.
+* BUT! Potions can be further apart or closer together. So I also calculate the total distance it has to travel, and multiply the duration of the tween by that. 
+  * This makes the animation take longer when potions are further apart, keeping the "speed" of this hop mostly the same.
+
+Yeah, I hadn't expected to need this much brain power and mathematics for a simple hop from one potion to another. But now I know how to do it, and it looks way better.
+
+### Level Of Detail
+
+A second problem was that I created a single illustration for my potions, which I used for both the _big potions_ (the ones you're manipulating) and the _small potions_ (the ones at the top that show your target for every move).
+
+What's the problem? By using the same image, but _much smaller_, those small potions have a much bigger **level of detail** (relatively speaking). Because the same details in my illustration are compressed into a much smaller space.
+
+In comparison, this made the big potions look very bland and basic and ... meh. Even though they were the _same_ drawing of a potion as the small ones!
+
+This was a nice reminder that a cohesive visual look depends on **consistency** of detail, not more or less detail. 
+
+{{% remark %}}
+There are many great-looking games and apps that use extremely minimalist shapes and colors. They look good because they are _consistent_ in applying this level of detail.
+
+For the same reason, I vastly prefer creating simplified/stylized "icons" if I am going to use a sprite on a small button or at a smaller size. Using the same image would make it look _bad_ because you try to add too much detail into a small space that doesn't want it.
+{{% /remark %}}
+
+I added some simple color variations and random "texturing" to the big potions, and it looked much better.
+
+### Everyone Likes Faces
+
+Still, I thought the game looked a bit bland. Everything was just a big tube/potion or a big chunk/ball. Even with details consistent, they're very rudimentary shapes that you're looking at all the time.
+
+I _also_ wanted to explain the game to players without requiring text/tutorial. And so I killed two birds with one stone.
+
+* I added a _smiley face_ on the chunks. 
+* It smiles when it's the same color as its potion (at the right place!), it cries otherwise.
+* This immediately made the game look much more friendly and alive and fun ...
+* ... while also immediately giving feedback on every move and explaining the game.
+
+To finish it off, I added some random (very slow/subtle) animation to all chunks to make them grow/shrink and move around a bit. I wanted them to feel like _bubbles_ floating inside the potion. I also made the outline less dark ("contrasting"), so they blended in a bit better with the potion.
+
+Now the game actually looked and felt great. Even though these are all small changes that won't take long to implement.
+
+I guess, whenever in doubt, just give everything googly eyes or a cute face and you're good.
+
+### The Cork Problem
+
+One thing that makes this puzzle a bit more advanced than the other color puzzles, is the fact that potions can be **full**. It's a crucial thing that makes the puzzles possible ... and it also requires a skill that comes close to counting. I know kids can see if a potion is filled, and I know at that age they can probably count _enough_ to solve everything, but it never hurts to give a little more feedback and guidance to _get there_. 
+
+Otherwise, for example, a kid might click a potion and hear the "error" sound, but not realize that it's disallowed because the potion is FULL. It's one thing to give the feedback "this isn't possible", it's another (crucial) thing to give the feedback "here's why".
+
+As such, I added a _cork_ at the top of potions that are full. To signal they can't get anything more inside.
+
+But this added an issue: you _can_ still take stuff OUT of them! The cork might give the idea that the potion is locked and completely unusable.
+
+What to do?
+
+* The obvious method of displaying text ("Potion Full!") just wasn't an option. These are educational puzzles for young kids, preferably language agnostic, I should find something smarter.
+* Any other alternatives (such as displaying a lock) were worse while having mostly the same issues.
+
+HOW do we signal that you CAN take something out of a full potion? By making the cork react to _that_ situation---trying to do the thing that _is_ allowed! 
+
+* Solution 1 = only display the cork when you actually **try to add something to the potion**. Don't display it by default.
+* Solution 2 = when you **hover** over the potion, make the cork lift up/disappear slightly
+
+I ended up going with solution 2. It looked cleanest and was most obvious. (I also allowed turning the cork off entirely in the settings, just in case.)
+
+I wanted to write about this problem because I think it's very instructive. And very indicative of the actual important problems you need to solve as a game developer. It's not about the flashy things, it's about "the cork problem": how do you create clean VISUAL FEEDBACK that tells the player exactly what they can or can't do, with the least chance of them misinterpreting?
+
+It basically took another day to get all these visuals sorted out (after some more rounds of iteration), add little animations and exceptions left and right, and get the strongest possible textless feedback. But it was absolutely worth it, because by the end of that day the game looked and played _much_ better. In other words: I wasn't ashamed of selling it anymore ;)
+
+{{% remark %}}
+It also took that long because I added an extra mode: play using SHAPES instead of COLORS. Because my code is flexible, I realized it was worth the small time investment to get that entire extra play mode "for free". I also simply wanted to see if it was possible and test a clean way to do it for future games that really need different "modes".
+{{% /remark %}}
 
 ## Conclusion
 
@@ -212,114 +310,3 @@ Potion Puzzle is not some amazing puzzle game. But it's one of the few education
 Until the next devlog,
 
 Pandaqi
-
-
-
-
-
-## Difficulties
-
-### Easiest
-
-* num_potion_bounds = (2,3)
-* potion_size_bounds = (2,3)
-* potion_start_contents_bounds = (1,2)
-* num_moves_bounds = (2,4)
-* allow_different_potion_sizes = false
-
-### Easy
-
-* num_potion_bounds = (3,4)
-* potion_size_bounds = (3,4)
-* potion_start_contents_bounds = (1,3)
-* num_moves_bounds = (3,5)
-* allow_different_potion_sizes = false
-
-### Medium
-
-* num_potion_bounds = (4,6)
-* potion_size_bounds = (3,6)
-* potion_start_contents_bounds = (2,4)
-* num_moves_bounds = (6,9)
-* allow_different_potion_sizes = false
-
-### Hard
-
-* num_potion_bounds = (4,6)
-* potion_size_bounds = (4,5)
-* allow_different_potion_sizes = true
-* potion_start_contents_bounds = (2,4)
-* num_moves_bounds = (8,10)
-* initial_state_diversity_factor = 0.5
-* prefer_deep_grab_probability = 0.5
-
-### Hardest
-
-* num_potion_bounds = (6,8)
-* potion_size_bounds = (4,6)
-* allow_different_potion_sizes = true
-* potion_start_contents_bounds = (2,5)
-* num_moves_bounds = (10,14)
-* initial_state_diversity_factor = 0.5
-* prefer_deep_grab_probability = 0.5
-
-
-
-## @TODO
-
-
-Graphics
-
-* POTION OVERLAY => Make the chunks connect into one thing, make slightly more transparent/blueish to match background. 
-  * Give slightly more detail to overall potions still?
-* CHUNKS
-  * Create them in different shapes
-  * Split the ball and its blobby overlay -> so we can shift the overlay around like floating bubbles too.
-    * Potentially REMOVE THE OUTLINE
-* SHAPE VERSION:
-  * Behind the scenes, it still uses `color`.
-  * But we simply display the ball SHAPES (ColorName.WHITE -> ShapeName.SQUARE etc mapping)
-  * Each potion shows the right shape at the bottom => use circular bottom now! => does require changing the HEIGHT calculation/offset for potions probably!
-  * Modulate the potion's color randomly
-  * WHAT TO DO WITH SMALL POTIONS?
-  * Play the audio for _shape names_ if `narrate_colors` is on.
-* FEEDBACK:
-  * Also give TEXT feedback on pressing that? Or display some arrow or "Target Potion" text permanently?
-  * And give TEXT/IMAGE feedback on "This potion is FULL"? => Maybe some subtle sound effect when it happens + some animation that plays while a potion is full. => Or just display a subtle "lock" or something on it while full => **Put the cork into it!**
-
-Finishing Touches
-
-* Finish this devlog (@TODO parts)
-* Some glitchiness with fast undoing, things not being removed when they should. (Maybe initialization call is wonky/different now?)
-* Tutorial
-  * Merely point at the right first move now (the target potion already wiggles)
-  * Try adding an AUDIO explanation? "Make all balls inside a potion the same color. Click a potion to move its top ball to the wiggly target potion."
-  * I mean how else are you going to explain that concept with images only?
-
-Stretch Goals:
-
-* @IDEA: Can we involve actual _color mixing_ somehow as the final difficulty?
-
-
-
-@SOURCE: Great website to compress WebM I record for these video games => https://www.xconvert.com/compress-webm
-
-@SOURCE: Turn recursive backtracker into iterative? 
-* https://stackoverflow.com/questions/13782136/can-a-backtracking-tail-recursive-algorithm-be-converted-to-iteration -->
-* https://stackoverflow.com/questions/20514267/how-can-i-collect-and-return-solutions-from-a-recursive-backtracking-algorithm/20531704#20531704
-
-
-PuzzleFramework:
-
-* Button to PLAY THE SOLUTION -> I can hide that in the game itself but at least use it for my own debugging
-  * Maybe more like a "HINT" system?
-* Allow setting favicon so we can load that (or at least briefly animate/show) on the Menu?
-  * Maybe just a subtle permanent place in the bottom-right corner?
-* Write some short docs on the few steps to take to _integrate the framework_ in each new game.
-* Actually _save_ user settings between sessions? (And save other data, like completed puzzles/highscore/etc?)
-* Even more generic tutorial support?
-* Localization (both text and audio)
-* Easy recolor background pattern menu
-* Show the SEED / NAME of the current puzzle? In case I want to remember/reuse?
-* Settings =>
-  * Add TOOLTIP again

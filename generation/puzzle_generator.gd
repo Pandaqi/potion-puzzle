@@ -54,6 +54,13 @@ func create_random_setup() -> void:
 	
 	var all_colors := ChunkData.get_all_colors()
 	all_colors.shuffle()
+	
+	# we have fewer shapes than colors, remove the least interesting ones
+	if PuzzleVisualizer.uses_shapes():
+		all_colors.erase(ChunkData.ColorName.BROWN)
+		all_colors.erase(ChunkData.ColorName.GRAY)
+		all_colors.erase(ChunkData.ColorName.WHITE)
+	
 	potions = []
 	var potions_at_max_size := 0
 	for i in range(num_potions):

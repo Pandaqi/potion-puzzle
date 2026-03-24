@@ -8,9 +8,9 @@ class_name PuzzleVisualizer
 
 @export var game_menu : PuzzleGameMenu
 @export var background : Background
+@export var tutorial : Tutorial
 
 @export var audio_whoosh : AudioStreamPlayer2D
-@export var audio_narrate : AudioStreamPlayer
 
 @export var curve_jump : Curve
 
@@ -24,6 +24,12 @@ var history_index := -1
 var current_turn := 0
 
 var jump_tween_active : Tween
+
+static func uses_shapes() -> bool:
+	return PuzzleFramework.get_setting_value("puzzle_type") == "Shapes"
+
+static func uses_colors() -> bool:
+	return PuzzleFramework.get_setting_value("puzzle_type") == "Colors"
 
 func play_chunk_transfer_tween(from:PotionData, chunk:ChunkData, to:PotionData) -> void:
 	if jump_tween_active:
@@ -144,6 +150,11 @@ func get_current_turn() -> int:
 func get_current_target() -> Potion:
 	return get_target(get_current_turn())
 
+func get_current_solution() -> Potion:
+	var potion_index : int = generator.solution[get_current_turn()].from
+	var potion_data := generator.potions[potion_index]
+	return get_potion_for_data(potion_data)
+
 func get_correct_potions() -> Array[Potion]:
 	return potions.filter(func(p:Potion): return p.data.is_all_same_color())
 
@@ -181,6 +192,7 @@ func on_puzzle_finished() -> void:
 	for potion in potions:
 		PuzzleTween.play_popdown_tween(potion)
 	color_list.disappear()
+	tutorial.disappear()
 
 func highlight_target() -> void:
 	if is_done(): return
@@ -193,10 +205,7 @@ func highlight_target() -> void:
 	background.set_color(cur_target.data.color)
 	
 	color_list.highlight_target(get_current_turn())
-	
-	if PuzzleFramework.get_setting_value("narrate_colors"):
-		audio_narrate.stream = load("res://map/chunks/sounds/" + ChunkData.convert_color_to_audio(cur_target.data.color) + ".ogg")
-		audio_narrate.play()
+	tutorial.on_turn_changed(get_current_solution(), cur_target, get_current_turn())
 
 #func _on_potion_clicked(p:Potion) -> void:
 	#var chunks_to_add := p.chunks.duplicate(false)

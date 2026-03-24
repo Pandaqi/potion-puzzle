@@ -26,6 +26,7 @@ static func play_focus_grab_tween(obj:Node2D) -> Tween:
 
 static func play_pointer_tween(obj:Node2D, pos:Vector2) -> Tween:
 	obj.show()
+	obj.z_index = 1024
 	obj.set_position(pos)
 	
 	var tw := obj.get_tree().create_tween()

@@ -3,7 +3,10 @@
 [ext_resource type="Script" uid="uid://bb005xh5vpvso" path="res://map/potions/potion.gd" id="1_0bsar"]
 [ext_resource type="PackedScene" uid="uid://qthtu18xkcx5" path="res://map/potions/segments/potion_segment.tscn" id="2_0bsar"]
 [ext_resource type="AudioStream" uid="uid://d3v8u25xskc3a" path="res://puzzle-framework/game/sfx/error.ogg" id="3_8uuxj"]
+[ext_resource type="Texture2D" uid="uid://cvehxqseqpyat" path="res://map/potions/cork.png" id="3_hyfyq"]
+[ext_resource type="Texture2D" uid="uid://c3dwa4pi1n6eq" path="res://map/chunks/smiley-happy-sad.png" id="3_u78na"]
 [ext_resource type="AudioStream" uid="uid://cch0wwwcrfh4u" path="res://puzzle-framework/game/sfx/lock-unlock.ogg" id="4_4xx6i"]
+[ext_resource type="Texture2D" uid="uid://bfo8crl8fjo6t" path="res://map/chunks/potion-chunks-spritesheet.png" id="4_kpv8e"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0bsar"]
 size = Vector2(65, 297)
@@ -95,17 +98,41 @@ _data = {
 &"highlighted": SubResource("Animation_8uuxj")
 }
 
-[node name="Potion" type="Node2D" unique_id=456152568 node_paths=PackedStringArray("segment_container", "anim_player", "area", "area_shape", "audio_error", "audio_click")]
+[node name="Potion" type="Node2D" unique_id=456152568 node_paths=PackedStringArray("segment_container", "anim_player", "smiley", "shape", "cork_container", "cork", "area", "area_shape", "audio_error", "audio_click")]
 script = ExtResource("1_0bsar")
 segment_scene = ExtResource("2_0bsar")
 segment_container = NodePath("SegmentContainer")
 anim_player = NodePath("AnimationPlayer")
+smiley = NodePath("SegmentContainer/Smiley")
+shape = NodePath("SegmentContainer/Shape")
+cork_container = NodePath("Cork")
+cork = NodePath("Cork/Cork")
 area = NodePath("Area2D")
 area_shape = NodePath("Area2D/CollisionShape2D")
 audio_error = NodePath("AudioError")
 audio_click = NodePath("AudioClick")
 
+[node name="Cork" type="Node2D" parent="." unique_id=1514031414]
+
+[node name="Cork" type="Sprite2D" parent="Cork" unique_id=193104247]
+texture = ExtResource("3_hyfyq")
+
 [node name="SegmentContainer" type="Node2D" parent="." unique_id=67632442]
+
+[node name="Smiley" type="Sprite2D" parent="SegmentContainer" unique_id=1178966384]
+z_index = 128
+position = Vector2(0, -32)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("3_u78na")
+hframes = 2
+
+[node name="Shape" type="Sprite2D" parent="SegmentContainer" unique_id=1895414639]
+z_index = 128
+position = Vector2(0, -32)
+scale = Vector2(0.33, 0.33)
+texture = ExtResource("4_kpv8e")
+hframes = 4
+vframes = 3
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1109203858]
 

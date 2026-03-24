@@ -5,11 +5,17 @@ var data : PotionData
 var size : Vector2
 var hovering := false
 var is_current_target := false
+var was_full := false
 
 var segments : Array[PotionSegment] = []
 @export var segment_scene : PackedScene
 @export var segment_container : Node2D
 @export var anim_player : AnimationPlayer
+@export var smiley : Sprite2D
+@export var shape : Sprite2D
+
+@export var cork_container : Node2D
+@export var cork : Sprite2D
 
 @export var area : Area2D
 @export var area_shape : CollisionShape2D
@@ -53,8 +59,10 @@ func animate_hover(dt:float) -> void:
 	
 	var target_y := -12.0 if hovering else 0.0
 	var target_modulate := Color(1.15, 1.15, 1.15) if hovering else Color.WHITE
+	var target_y_cork := -96.0 if hovering else 0.0
 	self.modulate = modulate.lerp(target_modulate, 8*dt)
 	self.position.y = lerpf(position.y, target_y, 8*dt)
+	cork.position.y = lerpf(cork.position.y, target_y_cork, 8*dt)
 
 func _on_mouse_entered() -> void:
 	hovering = true
@@ -125,7 +133,11 @@ func refresh() -> void:
 		# link to the chunks in our data
 		segment.unlink_chunk()
 		if type == PotionSegment.Type.MIDDLE and (i-1) < count():
-			segment.link_chunk(data.chunks[i-1])
+			var linked_chunk := data.chunks[i-1]
+			segment.link_chunk(self, linked_chunk)
+	
+	# make smiley reflect if potion is finished
+	smiley.set_frame(0 if data.is_all_same_color() else 1)
 	
 	# resize area to match height
 	var total_height := absf(highest_segment_position.y)
@@ -133,6 +145,28 @@ func refresh() -> void:
 	
 	area_shape.position.y = -0.5*total_height
 	area_shape.shape.size = size
+	
+	# display shape hint if playing that mode
+	shape.hide()
+	if PuzzleVisualizer.uses_shapes():
+		shape.show()
+		shape.set_frame(ChunkData.convert_shape_to_frame(ChunkData.convert_color_to_shape(data.color)))
+		shape.set_position(to_local(get_position_of_top()) + Vector2.DOWN*50.0)
+	
+	# display cork if we're full
+	var should_show_cork : bool = PuzzleFramework.get_setting_value("show_cork")
+	cork_container.set_visible(should_show_cork)
+	if should_show_cork:
+		if data.is_full() and not was_full:
+			var tw := get_tree().create_tween()
+			tw.tween_property(cork_container, "modulate:a", 1.0, 0.2)
+			cork_container.set_position(to_local(get_position_of_top()) + Vector2.DOWN*30.0)
+		else:
+			var tw := get_tree().create_tween()
+			tw.tween_property(cork_container, "modulate:a", 0.0, 0.2)
+	
+	was_full = data.is_full()
+
 
 #func reduce_by_matches() -> void:
 	## first count how often each one exists

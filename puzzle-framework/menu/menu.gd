@@ -4,8 +4,11 @@ class_name PuzzleMenu
 @export var button_container : VBoxContainer
 @export var button_scene : PackedScene
 @export var background : Control
+@export var menu_container : Control
 @export var pattern : ColorRect
-@export var label : Label
+@export var credits : Label
+@export var heading : Label
+@export var icon : TextureRect
 
 @export var button_back : TextureButton
 
@@ -13,12 +16,18 @@ class_name PuzzleMenu
 @export var settings : PuzzleSettings
 
 func _ready() -> void:
+	animate_heading()
 	create_buttons()
+	
 	get_viewport().size_changed.connect(_on_size_changed)
 	_on_size_changed()
 	
+	settings.toggled.connect(_on_settings_toggled)
+	
 	button_back.pressed.connect(_on_button_back_pressed)
 	button_settings.pressed.connect(_on_button_settings_pressed)
+	
+	heading.set_text(PuzzleFramework.game_name)
 	
 	if OS.get_name() == "html5":
 		button_back.hide()
@@ -26,14 +35,15 @@ func _ready() -> void:
 	if not PuzzleFramework.has_settings():
 		button_settings.hide()
 	
-	label.set_text("{game_name} v{game_version} | {game_tagline} | {creator_credit}".format({
+	credits.set_text("{game_name} v{game_version} | {game_tagline} | {creator_credit}".format({
 		"game_name": PuzzleFramework.game_name,
 		"game_version": PuzzleFramework.game_version,
 		"game_tagline": PuzzleFramework.game_tagline,
 		"creator_credit": PuzzleFramework.creator_credit
 	}))
 	
-	background.set_visible(PuzzleFramework.menu_pattern_enabled)
+	if PuzzleFramework.favicon != "":
+		icon.texture = load("res://" + PuzzleFramework.favicon)
 	
 	if PuzzleFramework.menu_scene_custom:
 		add_child(PuzzleFramework.menu_scene_custom.instantiate())
@@ -45,13 +55,19 @@ func _on_button_back_pressed() -> void:
 	get_tree().quit()
 
 func _on_button_settings_pressed() -> void:
-	if settings.is_visible(): 
-		settings.hide()
-	else: 
-		settings.show()
+	settings.toggle_active()
+
+func _on_settings_toggled(active:bool) -> void:
+	menu_container.set_visible(not active)
 
 func _on_size_changed() -> void:
 	pattern.material.set_shader_parameter("viewport_size", get_viewport_rect().size)
+
+func animate_heading() -> void:
+	var tw := get_tree().create_tween().set_ease(Tween.EASE_OUT)
+	var dur := randf_range(0.2, 0.4)
+	heading.modulate.a = 0.0
+	tw.tween_property(heading, "modulate:a", 1.0, dur)
 
 func create_buttons() -> void:
 	var diffs : Array[PuzzleDifficulty] = PuzzleFramework.difficulties

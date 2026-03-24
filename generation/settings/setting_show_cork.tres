@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="PuzzleSettingCheckbox" format=3 uid="uid://cc1gggtbp5lga"]
+
+[ext_resource type="Script" uid="uid://dhfd6mahjlglv" path="res://puzzle-framework/settings/setting_checkbox.gd" id="1_2ecta"]
+
+[resource]
+script = ExtResource("1_2ecta")
+key = "show_cork"
+label = "Show Cork On Full Potions"
+default = true
+metadata/_custom_type_script = "uid://dhfd6mahjlglv"

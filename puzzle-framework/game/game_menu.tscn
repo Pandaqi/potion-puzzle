@@ -6,13 +6,26 @@
 [ext_resource type="PackedScene" uid="uid://bg3okbe3j45a8" path="res://puzzle-framework/ui/buttons/button_undo.tscn" id="4_rs2vk"]
 [ext_resource type="PackedScene" uid="uid://vp1m4bup3jph" path="res://puzzle-framework/ui/buttons/button_next.tscn" id="5_yjix4"]
 
-[node name="GameMenu" type="CanvasLayer" unique_id=950523672 node_paths=PackedStringArray("container", "button_back", "button_restart", "button_undo", "button_next")]
+[node name="GameMenu" type="CanvasLayer" unique_id=950523672 node_paths=PackedStringArray("container", "label_seed", "button_back", "button_restart", "button_undo", "button_next")]
 script = ExtResource("1_u4vc1")
 container = NodePath("MarginContainer")
+label_seed = NodePath("Seed/Label")
 button_back = NodePath("MarginContainer/VBoxContainer/ButtonBack")
 button_restart = NodePath("MarginContainer/VBoxContainer/ButtonRestart")
 button_undo = NodePath("MarginContainer/VBoxContainer/ButtonUndo")
 button_next = NodePath("MarginContainer/VBoxContainer/ButtonNext")
+
+[node name="Seed" type="MarginContainer" parent="." unique_id=596682338]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Seed" unique_id=590329382]
+modulate = Color(1, 1, 1, 0.48235294)
+layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1232039053]
 custom_minimum_size = Vector2(320, 96)

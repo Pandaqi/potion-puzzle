@@ -26,7 +26,7 @@ vframes = 3
 z_index = 20
 
 [node name="Overlay" type="Sprite2D" parent="." unique_id=2104550095]
-modulate = Color(1, 1, 1, 0.65882355)
+modulate = Color(1, 1, 1, 0.40392157)
 z_index = 30
 texture = ExtResource("4_tn2yy")
 vframes = 3

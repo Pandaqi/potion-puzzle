@@ -2,6 +2,7 @@ extends CanvasLayer
 class_name PuzzleGameMenu
 
 @export var container : MarginContainer
+@export var label_seed : Label
 
 @export var button_back : TextureButton
 @export var button_restart : TextureButton
@@ -30,7 +31,12 @@ func _ready() -> void:
 	
 	container.custom_minimum_size.y = size
 	
+	set_label_text("Difficulty: " + PuzzleFramework.get_puzzle_difficulty_string() + " | Seed: " + str(PuzzleFramework.puzzle_seed))
+
 	PuzzleFramework.puzzle_done.connect(_on_puzzle_done)
+
+func set_label_text(txt:String) -> void:
+	label_seed.set_text(txt)
 
 func _on_button_back_pressed() -> void:
 	PuzzleFramework.go_back_to_menu()

@@ -3,14 +3,28 @@ class_name PotionSmall
 
 @export var base : Sprite2D
 @export var overlay : Sprite2D
+@export var shape : Sprite2D
 @export var shine : Sprite2D
 
 var base_size := 256.0
 var unfocused_scale := Vector2.ONE
 var active_tween : Tween
+@export var rotation_colored := -0.167 * PI
+
+func _ready() -> void:
+	set_rotation(0)
+	shape.show()
+	
+	if PuzzleVisualizer.uses_colors():
+		set_rotation(rotation_colored)
+		shape.hide()
 
 func set_color(c:ChunkData.ColorName) -> void:
 	overlay.modulate = ChunkData.convert_color_to_object(c)
+	
+	if PuzzleVisualizer.uses_shapes():
+		overlay.modulate = ChunkData.convert_color_to_object(ChunkData.ColorName.BLACK)
+		shape.set_frame(ChunkData.convert_shape_to_frame(ChunkData.convert_color_to_shape(c)))
 
 func set_size(size:float) -> void:
 	var new_scale := size / base_size * Vector2.ONE

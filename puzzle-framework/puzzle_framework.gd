@@ -6,10 +6,13 @@ class_name PuzzleFrameworkAutoload
 @export var game_version := "1.0"
 @export var game_tagline := "Educational Puzzle Game"
 @export var creator_credit := "The Wayward Melody"
+@export var favicon := ""
 
 @export_group("Menu")
 @export var menu_pattern_enabled := false
 @export var menu_scene_custom : PackedScene
+@export var menu_background_color := Color(0, 135/255.0, 244/255.0)
+@export var menu_pattern_color := Color(87/255.0, 167/255.0, 1.0)
 
 @export_group("Difficulties & Campaign")
 var current_difficulty := 0
@@ -23,6 +26,8 @@ var settings_by_id : Dictionary[String, PuzzleSetting] = {}
 var puzzle_seed := 0
 var state := State.MENU
 var audio : PuzzleAudio
+var num_attempts := 0
+var num_attempts_same_puzzle := 0
 
 enum State
 {
@@ -52,15 +57,21 @@ func go_back_to_menu() -> void:
 	change_state(State.MENU)
 	get_tree().change_scene_to_file("res://puzzle-framework/menu/menu.tscn")
 
-func reload_current_puzzle() -> void:
+func prepare_attempt(retry := false) -> void:
 	seed(puzzle_seed)
+	num_attempts += 1
+	if retry: num_attempts_same_puzzle += 1
+	else: num_attempts_same_puzzle = 1
+
+func reload_current_puzzle() -> void:
+	prepare_attempt(true)
 	change_state(State.LOAD)
 	get_tree().reload_current_scene()
 
 func load_new_puzzle(diff := get_puzzle_difficulty_level()) -> void:
 	current_difficulty = difficulties.find(difficulties_by_id[diff])
 	puzzle_seed = randi()
-	seed(puzzle_seed)
+	prepare_attempt()
 	change_state(State.LOAD)
 	get_tree().change_scene_to_file("res://main/main.tscn")
 
@@ -81,6 +92,9 @@ func get_puzzle_difficulty() -> PuzzleDifficulty:
 
 func get_puzzle_difficulty_level() -> PuzzleDifficulty.Difficulty:
 	return get_puzzle_difficulty().difficulty
+
+func get_puzzle_difficulty_string() -> String:
+	return PuzzleDifficulty.Difficulty.keys()[get_puzzle_difficulty_level()]
 
 func apply_difficulty_settings(obj) -> void:
 	var diff := get_puzzle_difficulty()

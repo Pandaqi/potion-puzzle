@@ -36,6 +36,8 @@ func set_type(tp:Type) -> void:
 	overlay.set_frame(frame)
 
 func set_color(col:ChunkData.ColorName) -> void:
+	if PuzzleVisualizer.uses_shapes():
+		col = ChunkData.get_all_colors().pick_random()
 	base.modulate = ChunkData.convert_color_to_object(col)
 
 func get_size() -> Vector2:
@@ -44,7 +46,8 @@ func get_size() -> Vector2:
 func has_chunk() -> bool:
 	return chunk != null
 
-func link_chunk(c:ChunkData) -> void:
+func link_chunk(p:Potion, c:ChunkData) -> void:
+	chunk.potion_color = p.data.color
 	chunk.set_from_data(c)
 
 func unlink_chunk() -> void:
